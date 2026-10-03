@@ -2,22 +2,30 @@
 (function(){
   "use strict";
 
-  // Mobile-Navigation
+  // Mobile-Navigation: öffnen/schließen, Label und aria-expanded stets synchron, Escape schließt
   var burger = document.querySelector('.burger');
   var mobileNav = document.querySelector('.mobile-nav');
   if (burger && mobileNav) {
-    burger.addEventListener('click', function(){
-      var open = burger.classList.toggle('open');
+    var setNav = function(open, returnFocus){
+      burger.classList.toggle('open', open);
       mobileNav.classList.toggle('open', open);
       document.body.classList.toggle('nav-open', open);
       burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      burger.setAttribute('aria-label', open ? 'Menü schließen' : 'Menü öffnen');
+      if (!open && returnFocus) burger.focus();
+    };
+    burger.addEventListener('click', function(){
+      setNav(!burger.classList.contains('open'), false);
     });
     mobileNav.querySelectorAll('a').forEach(function(a){
-      a.addEventListener('click', function(){
-        burger.classList.remove('open');
-        mobileNav.classList.remove('open');
-        document.body.classList.remove('nav-open');
-      });
+      a.addEventListener('click', function(){ setNav(false, false); });
+    });
+    document.addEventListener('keydown', function(ev){
+      if (ev.key === 'Escape' && burger.classList.contains('open')) setNav(false, true);
+    });
+    // Beim Aufziehen des Fensters über den Umbruch hinaus: Menü zurücksetzen
+    window.matchMedia('(min-width:1101px)').addEventListener('change', function(m){
+      if (m.matches) setNav(false, false);
     });
   }
 
@@ -39,12 +47,18 @@
   // Kontaktformular per FormSubmit (kein eigenes Backend nötig)
   var form = document.querySelector('#kontaktformular');
   if (form) {
+    var status = form.querySelector('.form-status');
+    var showStatus = function(kind, html){
+      if (!status) return;
+      status.className = 'form-status show ' + kind;
+      status.innerHTML = html;
+    };
     form.addEventListener('submit', function(ev){
       ev.preventDefault();
       var btn = form.querySelector('button[type="submit"]');
-      var success = document.querySelector('.form-success');
       var originalLabel = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = 'Wird gesendet…'; }
+      if (status) { status.className = 'form-status'; status.textContent = ''; }
 
       fetch(form.action, {
         method: 'POST',
@@ -53,14 +67,14 @@
       }).then(function(res){
         if (!res.ok) throw new Error('Senden fehlgeschlagen');
         form.reset();
-        if (success) success.classList.add('show');
-        if (btn) { btn.textContent = 'Gesendet ✓'; }
-      }).catch(function(){
-        if (btn) { btn.textContent = 'Fehler – bitte anrufen'; }
-      }).finally(function(){
+        showStatus('ok', 'Danke! Ihre Nachricht ist angekommen – wir melden uns zeitnah.');
+        if (btn) { btn.textContent = 'Gesendet'; }
         setTimeout(function(){
           if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
         }, 4000);
+      }).catch(function(){
+        showStatus('err', 'Das Senden hat leider nicht geklappt. Bitte rufen Sie uns direkt an: <a href="tel:+4917624860016">0176 24860016</a> – oder schreiben Sie an <a href="mailto:info@zeca-alu.de">info@zeca-alu.de</a>.');
+        if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
       });
     });
   }
