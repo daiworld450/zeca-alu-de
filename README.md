@@ -18,9 +18,10 @@ ueber-uns/                      Über das Unternehmen
 kontakt/                        Kontaktformular + Adresse
 impressum/, datenschutz/        Pflichtseiten
 assets/style.css, assets/main.js  geteiltes CSS/JS
-assets/fonts/                   selbst gehostete Schriften (Inter, Sora)
+assets/fonts/                   selbst gehostete Schrift (Archivo, SIL OFL, Lizenz liegt bei)
 images/bestand/                 vorhandene echte Fotos + Logo
 images/README.md                Liste noch fehlender Fotos
+PRODUCT.md, DESIGN.md           Produktwahrheit und Gestaltungssystem (Systemblatt), Grundlage für alle weiteren Änderungen
 ```
 
 ## Deployment (GitHub Pages, kostenfrei)
